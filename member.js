@@ -1,3 +1,13 @@
 function skillMember() {
-    console.log("This is a skill member function.");
+    return {
+        restrict: 'E',
+        templateUrl: 'app/components/skill/member/member.html',
+        scope: {
+            member: '=',
+            skill: '='
+        },
+        controller: 'SkillMemberController',
+        controllerAs: 'vm',
+        bindToController: true
+    };
 }
