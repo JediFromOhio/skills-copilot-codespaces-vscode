@@ -1,50 +1,30 @@
 //create web server
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-//connect to mongodb
-mongoose.connect('mongodb://localhost:27017/commentsDB', { useNewUrlParser: true, useUnifiedTopology: true });
-
-//create comment schema
-const commentSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    comment: String,
-    date: { type: Date, default: Date.now }
-});
-
-//create comment model
-const Comment = mongoose.model('Comment', commentSchema);
-
-//middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-//routes
-app.post('/comments', async (req, res) => {
-    const { name, email, comment } = req.body;
-    const newComment = new Comment({ name, email, comment });
-    try {
-        await newComment.save();
-        res.status(201).send('Comment added successfully');
-    } catch (error) {
-        res.status(500).send('Error adding comment');
+//create server object
+http.createServer((req, res) => {
+    //check if request is for favicon.ico
+    if (req.url === '/favicon.ico') {
+        res.writeHead(204);
+        res.end();
+        return;
     }
-});
 
-app.get('/comments', async (req, res) => {
-    try {
-        const comments = await Comment.find();
-        res.status(200).json(comments);
-    } catch (error) {
-        res.status(500).send('Error fetching comments');
-    }
-});
+    //set response header
+    res.writeHead(200, { 'Content-Type': 'text/html' });
 
-//start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    //read html file
+    fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
+        if (err) {
+            res.writeHead(500);
+            res.end('Error loading index.html');
+            return;
+        }
+        //send html file to client
+        res.end(data);
+    });
+}).listen(8080, () => {
+    console.log('Server running at http://localhost:8080/');
 });
